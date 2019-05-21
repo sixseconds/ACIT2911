@@ -86,7 +86,7 @@ function genNotif(event) {
 // };
 
 self.addEventListener("push", event => {
-    // console.log(event);
+    console.log(event);
     event.waitUntil(genNotif(event));
 });
 
