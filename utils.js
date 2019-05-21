@@ -126,7 +126,7 @@ async function openStream() {
             return response.json();
         });
 
-        // console.log(pushSubscription.body);
+        //console.log(pushSubscription.body.user);
         let user = pushSubscription.body.user;
 
         if (
@@ -158,36 +158,11 @@ async function openStream() {
                 });
 
             console.log(`Push: ${pushed.statusCode}`);
+            return
         }
 
         //await promises.updateUserPromise(user._id, item);
     });
-}
-
-// closes thread stream notifications
-async function closeStream(user_id) {
-    var db = getDb();
-
-    //var user = await promises.userPromise(user_id);
-
-    const collection = db.collection("messages");
-
-    const thread_changeStream = collection.watch([
-        {
-            $match: {
-                $and: [
-                    { "fullDocument.type": "reply" },
-                    {
-                        "fullDocument.thread_id": {
-                            $in: user.subscribed_threads
-                        }
-                    } //,
-                    //{ "fullDocument.username": { $ne: user.username } }
-                ]
-            }
-        }
-    ]);
-    thread_changeStream.close();
 }
 
 async function dm_formatNotif(change, pushSubscription) {
@@ -237,10 +212,8 @@ async function reply_openStream() {
     dm_changeStream.on("change", async change => {
         // console.log(change);
 
-        let pushSubscription = await fetch(subEndpoint).then(response => {
-            return response.json();
-        });
-        // console.log(pushSubscription.body);
+        let pushSubscription = await db.collection("users").findOne({_id: change.fullDocument.recipient});
+        //console.log(pushSubscription.body.user);
 
         if (
             change.fullDocument.recipient.toString() ===
@@ -271,6 +244,7 @@ async function reply_openStream() {
                 });
 
             console.log(`Push: ${pushed.statusCode}`);
+            return
         }
     });
 }
